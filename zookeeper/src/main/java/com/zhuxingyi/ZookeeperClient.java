@@ -21,6 +21,5 @@ public class ZookeeperClient {
         client.start();
 
         String s = client.create().forPath("/zhuxingyi");
-        System.out.println(s);
     }
 }
