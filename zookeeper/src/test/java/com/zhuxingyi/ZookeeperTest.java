@@ -8,7 +8,7 @@ import org.apache.curator.framework.api.CuratorEvent;
 import org.apache.curator.framework.api.transaction.CuratorOp;
 import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
 import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -115,15 +115,62 @@ public class ZookeeperTest {
     @Test
     public void testNodeCache() throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        final NodeCache nodeCache = new NodeCache(client,"/zhuxingyi");
+        final NodeCache nodeCache = new NodeCache(client, "/zhuxingyi");
         nodeCache.getListenable().addListener(() -> {
             System.out.println("/zhuxingyi节点有变化了");
             byte[] data = nodeCache.getCurrentData().getData();
-
             countDownLatch.countDown();
         });
         nodeCache.start(true);
         countDownLatch.await();
+    }
+
+    /**
+     * 1、InterProcessMutex：分布式可重入排它锁
+     * 2、InterProcessSemaphoreMutex：分布式排它锁
+     * 3、InterProcessReadWriteLock：分布式读写锁
+     * 测试分布式锁
+     */
+
+    public static int i = 0;
+
+    @Test
+    public void testDistributeLock() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(100);
+        InterProcessMutex mutex = new InterProcessMutex(client, "/lock");
+        for (int i = 0; i < 100; i++) {
+            new Thread(new TestThread(mutex, countDownLatch)).start();
+        }
+        countDownLatch.await();
+        System.out.println(i);
+    }
+
+    static class TestThread implements Runnable {
+        private InterProcessMutex mutex;
+        private CountDownLatch countDownLatch;
+
+        public TestThread(InterProcessMutex mutex, CountDownLatch countDownLatch) {
+            this.mutex = mutex;
+            this.countDownLatch = countDownLatch;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mutex.acquire();
+                i++;
+                countDownLatch.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    mutex.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
     }
 
     @After
