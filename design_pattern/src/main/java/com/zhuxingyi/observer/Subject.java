@@ -1,4 +1,4 @@
-package com.zhuxingyi.observer.test;
+package com.zhuxingyi.observer;
 
 /**
  * @author zhuxingyi

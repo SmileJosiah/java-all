@@ -1,4 +1,4 @@
-package com.zhuxingyi.observer.test;
+package com.zhuxingyi.observer;
 
 import java.util.ArrayList;
 import java.util.List;
