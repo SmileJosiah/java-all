@@ -12,6 +12,7 @@
 
     <modules>
         <module>zookeeper</module>
+        <module>design_pattern</module>
     </modules>
 
     <properties>
