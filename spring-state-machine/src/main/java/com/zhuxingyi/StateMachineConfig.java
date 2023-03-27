@@ -7,7 +7,6 @@ import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
-import org.springframework.statemachine.config.common.annotation.AnnotationBuilder;
 import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
