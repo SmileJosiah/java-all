@@ -15,9 +15,14 @@ public class HierarchicalSpringEventPropagateDemo {
         AnnotationConfigApplicationContext currentContext = new AnnotationConfigApplicationContext();
         currentContext.setId("current-context");
         parentContext.register(MyListener.class);
+        currentContext.register(MyListener.class);
+
         currentContext.setParent(parentContext);
         parentContext.refresh();
         currentContext.refresh();
+
+        currentContext.close();
+        parentContext.close();
 
     }
 
