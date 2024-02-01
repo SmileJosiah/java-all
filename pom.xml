@@ -15,6 +15,7 @@
         <module>design_pattern</module>
         <module>figure_bed</module>
         <module>spring-state-machine</module>
+        <module>spring-boot-study</module>
     </modules>
 
     <properties>
