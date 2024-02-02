@@ -153,3 +153,95 @@ public class ApplicationListenerDemo {
 * 如何避免
 
   * 定位Spring事件源（ApplicationContext）进行过滤处理
+
+## Spring内建事件
+
+* ApplicationContextEvent派生事件
+  * ContextRefreshedEvent：Spring应用上下文就绪事件
+  * ContextStartedEvent：Spring应用上下文启动事件
+  * ContextStopedEvent：Spring应用上下文停止事件
+  * ContextClosedEvent：Spring应用上下文关闭事件
+
+## Spring Payload事件
+
+* Spring payload事件 - org.springframework.context.PayloadApplicationEvent
+  * 使用场景：简化Spring事件发送，关注事件源主体
+  * 发送方法
+    * ApplicationEventPublisher#publishEvent(java.lang.Object)
+
+## Spring自定义事件
+
+* 扩展 org.springframework.context.ApplicationEvent
+* 实现 org.springframework.context.ApplicationListener
+* 注册 org.springframework.context.ApplicationListener
+
+## 依赖出入 ApplicationEventPublisher
+
+* 通过ApplicationEventPublisherAware接口
+* 通过@Autowried ApplicationEventPublisher
+
+## 同步和异步Spring 事件广播
+
+* 基于实现类 - org.framework.context.event.SimpleApplicationEventMulticaster
+  * 模式切换： setTaskExecutor
+    * 默认模式：同步
+    * 异步模式：如java.util.concurrent.ThreadPoolExecutor
+  * 设计缺陷：非基于接口契约编程
+
+## Spring 事件异常处理
+
+* Spring 3.0 错误处理接口 -org.springframework.util.ErrorHanlder
+
+  ```JAVA
+  
+  ApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
+  if (multicaster instanceof SimpleApplicationEventMulticaster) {
+      SimpleApplicationEventMulticaster eventMulticaster = (SimpleApplicationEventMulticaster) multicaster;
+      ExecutorService executorService = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("my-spring-event-thread-pool"));
+      eventMulticaster.setTaskExecutor(executorService);
+      eventMulticaster.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
+          @Override
+          public void onApplicationEvent(ContextClosedEvent event) {
+              if (!executorService.isShutdown()) {
+                  executorService.shutdown();
+              }
+          }
+      });
+      eventMulticaster.setErrorHandler(e -> {
+          System.out.printf("当Spring事件异常时，原因是:%s\n", e.getMessage());
+      });
+  }
+  ```
+
+  
+
+## Spring 事件/监听器实现原理
+
+* 核心类 org.springframework.context.event.SimpleApplicationEventMulticaster
+  * 设计模式：观察者模式扩展
+    * 被观察者- 
+  * 执行模式：同步/异步
+  * 异常处理： org.springframework.util.ErrorHandler
+  * 泛型处理：org.springframework.core.ResolvableType
+
+## Spring Boot 和Spring Cloud中的事件
+
+* Spring Boot事件
+
+  | 事件类型                 | 发生时机                  |
+  | ------------------------ | ------------------------- |
+  | ApplicationStartingEvent | 当Spring Boot应用已启动时 |
+  | ApplicationStaredEvent   |                           |
+  |                          |                           |
+
+* Spring Cloud事件
+
+  | 事件类型              | 发生时机                               |
+  | --------------------- | -------------------------------------- |
+  | EnviromentChangeEvent | 当Enviroment示例配置属性发生变化的时候 |
+
+  
+
+## Spring 同步和异步事件处理的使用场景
+
+ @EventLisenter的工作原理
